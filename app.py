@@ -1,36 +1,30 @@
-from flask import Flask, render_template, request, send_file
+import streamlit as st
 import yt_dlp
 import os
 import time
 
-app = Flask(__name__)
+st.title("📥 Instagram Reel Downloader")
 
-DOWNLOAD_FOLDER = "static/downloads"
-os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
+link = st.text_input("📌 Enter Instagram Reel Link:")
 
-@app.route("/", methods=["GET", "POST"])
-def index():
-    if request.method == "POST":
-        link = request.form["url"]
-        if link:
-            try:
-                filename = f"reel_{int(time.time())}.mp4"
-                filepath = os.path.join(DOWNLOAD_FOLDER, filename)
+if st.button("🚀 Download Reel"):
+    if link:
+        try:
+            filename = f"reel_{int(time.time())}.mp4"
+            filepath = os.path.join("downloads", filename)
 
-                ydl_opts = {
-                    'outtmpl': filepath,
-                    'format': 'bestvideo+bestaudio/best',
-                }
+            ydl_opts = {
+                'outtmpl': filepath,
+                'format': 'bestvideo+bestaudio/best',
+            }
 
-                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    ydl.download([link])
-
-                return send_file(filepath, as_attachment=True)
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([link])
             
-            except Exception as e:
-                return f"Error: {e}"
+            with open(filepath, "rb") as file:
+                st.download_button(label="📥 Click here to Download", data=file, file_name=filename, mime="video/mp4")
 
-    return render_template("index.html")
-
-if __name__ == "__main__":
-    app.run(debug=True)
+        except Exception as e:
+            st.error(f"❌ Something went wrong: {e}")
+    else:
+        st.warning("⚠ Please enter a valid Instagram reel link.")
