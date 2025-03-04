@@ -7,11 +7,17 @@ st.title("📥 Instagram Reel Downloader")
 
 link = st.text_input("📌 Enter Instagram Reel Link:")
 
+DOWNLOAD_FOLDER = "downloads"
+
+# 🔹 Folder exist hai to error avoid kare
+if not os.path.exists(DOWNLOAD_FOLDER):
+    os.makedirs(DOWNLOAD_FOLDER)
+
 if st.button("🚀 Download Reel"):
     if link:
         try:
             filename = f"reel_{int(time.time())}.mp4"
-            filepath = os.path.join("downloads", filename)
+            filepath = os.path.join(DOWNLOAD_FOLDER, filename)
 
             ydl_opts = {
                 'outtmpl': filepath,
@@ -20,7 +26,7 @@ if st.button("🚀 Download Reel"):
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([link])
-            
+
             with open(filepath, "rb") as file:
                 st.download_button(label="📥 Click here to Download", data=file, file_name=filename, mime="video/mp4")
 
